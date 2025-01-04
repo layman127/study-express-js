@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        Int      @id @unique @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+    email     String   @unique
+    name      String
+    password  String
+    image     String[]
+
+    exercicesLogs ExerciceLog[]
+    workoutLogs   WorkoutLog[]
+}
+
+//тренировка
+model Workout {
+    id          Int          @id @unique @default(autoincrement())
+    createdAt   DateTime     @default(now()) @map("created_at")
+    updatedAt   DateTime     @updatedAt @map("updated_at")
+    name        String
+    exercices   Exercice[]
+    workoutLogs WorkoutLog[]
+}
+
+//упражнение как шаблон
+model Exercice {
+    id            Int          @id @unique @default(autoincrement())
+    createdAt     DateTime     @default(now()) @map("created_at")
+    updatedAt     DateTime     @updatedAt @map("updated_at")
+    name          String
+    time          Int
+    iconPath      String       @map("icon_path")
+    workout       Workout[]
+    ExerciceLog   ExerciceLog? @relation(fields: [exerciceLogId], references: [id]) //XXX что то подозрительное у макса мб ошибка
+    exerciceLogId Int?
+}
+
+// заход на упражнение
+model ExerciceLog {
+    id           Int            @id @unique @default(autoincrement())
+    createdAt    DateTime       @default(now()) @map("created_at")
+    updatedAt    DateTime       @updatedAt @map("updated_at")
+    isCompleted  Boolean        @default(false) @map("is_completed")
+    times        ExerciceTime[]
+    exercice     Exercice[]
+    user         User?          @relation(fields: [userId], references: [id])
+    userId       Int?           @map("user_id")
+    workoutLog   WorkoutLog?    @relation(fields: [workoutLogId], references: [id])
+    workoutLogId Int?
+
+    @@map("Exercice_log")
+}
+
+// это уже сами подходы к заходу на уражнения
+model ExerciceTime {
+    id          Int      @id @unique @default(autoincrement())
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+    weight      Int      @default(0)
+    repeat      Int      @default(0)
+    isCompleted Boolean  @default(false) @map("is_completed")
+
+    exerciceLog   ExerciceLog? @relation(fields: [exerciceLogId], references: [id])
+    exerciceLogId Int?         @map("exercice_log_id")
+
+    @@map("Exercice_time")
+}
+
+model WorkoutLog {
+    id          Int           @id @unique @default(autoincrement())
+    createdAt   DateTime      @default(now()) @map("created_at")
+    updatedAt   DateTime      @updatedAt @map("updated_at")
+    isCompleted Boolean       @default(false) @map("is_completed")
+    exerciceLog ExerciceLog[]
+    workout     Workout?      @relation(fields: [workoutId], references: [id])
+    workoutId   Int?          @map("workout_id")
+    user        User?         @relation(fields: [userId], references: [id])
+    userId      Int?          @map("user_id")
+
+    @@map("Workout_log")
+}
