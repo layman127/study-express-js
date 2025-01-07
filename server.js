@@ -11,6 +11,7 @@ import {
     notFound,
 } from './app/middleware/error.middleware.js';
 import path from 'path';
+import { cors } from 'cors';
 // определяем приложение
 const app = express();
 const stage = process.env.NODE_ENV;
@@ -21,6 +22,7 @@ async function main() {
     if (stage == 'development') {
         app.use(morgan('dev'));
     }
+    app.use(cors());
     // подключение json для апишек
     app.use(express.json());
     //отдаем статический контент
