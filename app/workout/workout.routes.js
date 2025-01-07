@@ -8,6 +8,8 @@ import {
     getWorkouts,
 } from './workout.controller.js';
 import { createWorkoutLog } from '../workout/log/workout-log.controller.js';
+import { updateCompleteWorkoutLog } from './log/update-workout-log.controller.js';
+import { getWorkoutLog } from './log/get-workout-log.controller.js';
 const router = express.Router();
 
 router
@@ -22,5 +24,9 @@ router
     .delete(protect, deleteWorkout);
 router
     .route('/log/:workoutId')
-    .post(protect, createWorkoutLog);
+    .post(protect, createWorkoutLog)
+    .get(protect, getWorkoutLog);
+router
+    .route('/log/complete/:workoutId')
+    .patch(protect, updateCompleteWorkoutLog);
 export default router;
